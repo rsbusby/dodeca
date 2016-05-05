@@ -46,12 +46,36 @@ ar = zeros((12, 3))
 for i in range(12):
     ar[i] = dot(aa[i], rm3)
 
+def get_closest(array, row):
+    
+    if 0:  
+        distance,index = spatial.KDTree(array).query(row)
+
+    else: 
+        aa = array
+        low_dist = 1
+        for i in range(11):
+            dist = ((row[0] - aa[i,0]) * (row[0] - aa[i,0]) 
+                    + (row[1] - aa[i,1])*(row[1]*aa[i,1]) 
+                    + (row[2] - aa[i,2])*(row[2] - aa[i,2]))
+
+            if dist < 0.05:
+                print dist
+                index = i
+                break
+            elif dist < low_dist:
+                index = i
+                low_dist = dist
+    return index 
+
+
 def channel_from_euler(roll, pitch, yaw, dodeca_array=ar, verbosity = 0):
     """ Get dodecahedron side from Euler angle """
     rr = euler_matrix(roll, pitch, yaw, 'sxyz')
     rr3 = rr[0:3, 0:3]
-    distance,index = spatial.KDTree(dodeca_array).query(rr3[2])
+    #distance,index = spatial.KDTree(dodeca_array).query(rr3[2])
+    index = get_closest(dodeca_array, rr3[2])
     if verbosity > 0: 
-        print "{}\t{}".format(index, distance)
+        print "{}".format(index)
     return index
 
