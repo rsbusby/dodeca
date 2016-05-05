@@ -2,7 +2,7 @@
 from transformations import concatenate_matrices, euler_matrix, euler_from_matrix
 from transformations import quaternion_from_matrix, euler_from_quaternion, rotation_from_matrix, rotation_matrix
 from numpy import zeros, array, dot, cross
-from scipy import spatial
+#from scipy import spatial
 import math
 from math import sqrt
 pi = math.pi
@@ -48,24 +48,19 @@ for i in range(12):
 
 def get_closest(array, row):
     
-    if 0:  
-        distance,index = spatial.KDTree(array).query(row)
-
-    else: 
-        aa = array
-        low_dist = 1
-        for i in range(11):
-            dist = ((row[0] - aa[i,0]) * (row[0] - aa[i,0]) 
-                    + (row[1] - aa[i,1])*(row[1]*aa[i,1]) 
-                    + (row[2] - aa[i,2])*(row[2] - aa[i,2]))
-
-            if dist < 0.05:
-                print dist
-                index = i
-                break
-            elif dist < low_dist:
-                index = i
-                low_dist = dist
+    aa = array
+    low_dist = 1
+    for i in range(11):
+        dist = ((row[0] - aa[i,0]) * (row[0] - aa[i,0]) 
+                + (row[1] - aa[i,1])*(row[1]*aa[i,1]) 
+                + (row[2] - aa[i,2])*(row[2] - aa[i,2]))
+        if dist < 0.05:
+            print dist
+            index = i
+            break
+        elif dist < low_dist:
+            index = i
+            low_dist = dist
     return index 
 
 
