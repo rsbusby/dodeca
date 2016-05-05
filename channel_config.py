@@ -1,5 +1,5 @@
 
-
+# off channel is 7?
 
 diva_sounds = [
   'samples/diva01.wav',

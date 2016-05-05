@@ -9,6 +9,8 @@ import math
 from get_dodeca_points import channel_from_euler
 from channel_config import sound_files
 
+OFF_CHANNEL = 7
+
 SETTINGS_FILE = "RTIMULib"
 
 print("Using settings file " + SETTINGS_FILE + ".ini")
@@ -42,18 +44,6 @@ import pygame.mixer as pm
 pm.init()
 pm.pre_init(44100, -16, 1, 4096)
 
-diva_sounds = ['samples/diva01.wav',
-  'samples/diva02.wav',
-  'samples/diva03.wav',
-  'samples/diva04.wav',
-]
-
-desert_sounds = [ 
-    'samples/desertstrings1.wav',
-    'samples/desertstrings2.wav',
-    'samples/desertstrings3.wav',
-    'samples/desertstrings4.wav']
-
 def start_sounds(sound_list):
     """ start list of sound files with PyGame  
     """
@@ -67,16 +57,24 @@ def start_sounds(sound_list):
 
     return
 
-#start_sounds(diva_sounds)
+def is_rotating(data, threshold = 0.01):
+    dg = data['gyro']
+    
+    magnitude = (dg[0]*dg[0] + dg[1]*dg[1] + dg[2]*dg[2])
+    if magnitude > threshold:
+        return True
+    else:
+        return False
+
 
 count = 0
-cur_chan = 7
-recently_paused = False
+cur_chan = OFF_CHANNEL
 while True:
   if imu.IMURead():
     # x, y, z = imu.getFusionData()
     # print("%f %f %f" % (x,y,z))
     data = imu.getIMUData()
+    
     fusionPose = data["fusionPose"]
     if not (count % 8):
       
@@ -91,41 +89,21 @@ while True:
       yaw_rad = fusionPose[2]
       chan = channel_from_euler(roll_rad, pitch_rad, yaw_rad, verbosity=1)
 
-      if chan == 7:
-          if cur_chan != 7:
-              print "Pausing" + str(count) 
+      rotating = is_rotating(data)
+
+      if chan == OFF_CHANNEL and not rotating:
+          if cur_chan != OFF_CHANNEL:
+              print "Pausing" 
               pm.fadeout(1000)
-              cur_chan = 7
+              cur_chan = OFF_CHANNEL
           count = 0
 
-      #elif cur_chan == 7:
-      #    print "Back..."
-      #    #pm.unpause()
-      #    pm.stop()
-      #    #pm.fadeout(500)
-      #    if coun
-      #    start_sounds(sound_files[chan])
-      #    cur_chan = chan
-      #    count = 0
-
-      elif chan != cur_chan and count > 120:
-          print "WAHATT"
-
-          if recently_paused:
-              pm.fadeout(500)
-              #count = 0
-              #continue
-          else:
-              pm.fadeout(2500)
-
-          print "YEEEP"
-          print sound_files[chan]
+      elif chan != cur_chan and not rotating:
+          print "Switching to channel {}".format(chan)
+          pm.fadeout(2500)
           start_sounds(sound_files[chan])
           cur_chan = chan
           count = 0
-      #elif cur_chan == :
-      #  
-      #    pm.unpause()
       
     time.sleep(poll_interval*1.0/1000.0)
     count += 1
