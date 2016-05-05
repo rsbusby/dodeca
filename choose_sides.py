@@ -7,6 +7,7 @@ import time
 import math
 
 from get_dodeca_points import channel_from_euler
+from channel_config import sound_files
 
 SETTINGS_FILE = "RTIMULib"
 
@@ -66,10 +67,11 @@ def start_sounds(sound_list):
 
     return
 
-start_sounds(diva_sounds)
+#start_sounds(diva_sounds)
 
 count = 0
-track = 1
+cur_chan = 7
+recently_paused = False
 while True:
   if imu.IMURead():
     # x, y, z = imu.getFusionData()
@@ -90,22 +92,40 @@ while True:
       chan = channel_from_euler(roll_rad, pitch_rad, yaw_rad, verbosity=1)
 
       if chan == 7:
-          print "Pausing" + str(count) 
-          pm.pause()
-      elif chan in [1, 3, 5, 9, 11] and track == 1 and count > 200:
-           print pm.get_busy()
-           if track == 1:
-               pm.fadeout(3000)
-               start_sounds(desert_sounds)
-               track = 2
-               count = 0
-      elif chan in [0, 2, 4, 6, 8, 10]  and track == 2 and count > 200:
-          pm.fadeout(2500)
-          start_sounds(diva_sounds)
-          track = 1  
+          if cur_chan != 7:
+              print "Pausing" + str(count) 
+              pm.fadeout(1000)
+              cur_chan = 7
           count = 0
-      else:
-          pm.unpause()
+
+      #elif cur_chan == 7:
+      #    print "Back..."
+      #    #pm.unpause()
+      #    pm.stop()
+      #    #pm.fadeout(500)
+      #    if coun
+      #    start_sounds(sound_files[chan])
+      #    cur_chan = chan
+      #    count = 0
+
+      elif chan != cur_chan and count > 120:
+          print "WAHATT"
+
+          if recently_paused:
+              pm.fadeout(500)
+              #count = 0
+              #continue
+          else:
+              pm.fadeout(2500)
+
+          print "YEEEP"
+          print sound_files[chan]
+          start_sounds(sound_files[chan])
+          cur_chan = chan
+          count = 0
+      #elif cur_chan == :
+      #  
+      #    pm.unpause()
       
     time.sleep(poll_interval*1.0/1000.0)
     count += 1
